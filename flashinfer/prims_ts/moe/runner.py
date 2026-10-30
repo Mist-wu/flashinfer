@@ -1146,6 +1146,9 @@ class _PrimsTsMoERunnerMixin:
                 do_finalize=kwargs["do_finalize"],
                 enable_pdl=kwargs["enable_pdl"],
                 use_routing_scales_on_input=use_routing_scales_on_input,
+                zero_rows_without_local_expert=kwargs.get(
+                    "zero_rows_without_local_expert", True
+                ),
             )
 
     @staticmethod
@@ -1166,6 +1169,7 @@ class _PrimsTsMoERunnerMixin:
         do_finalize: bool,
         enable_pdl: bool,
         use_routing_scales_on_input: bool = False,
+        zero_rows_without_local_expert: bool = True,
     ):
         if do_finalize:
             # The join above fully orders both partition outputs eagerly.
@@ -1185,6 +1189,7 @@ class _PrimsTsMoERunnerMixin:
                 enable_pdl,
                 use_routing_scales_on_input,
                 second_gemm2_output,
+                zero_rows_without_local_expert,
             )
             return []
         if second_gemm2_output is not None:
@@ -1599,6 +1604,7 @@ class PrimsTsBf16MoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 False,
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
@@ -1943,6 +1949,7 @@ class PrimsTsNvfp4MoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 False,
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
@@ -2439,6 +2446,7 @@ class PrimsTsMxfp4Mxfp8MoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 self.top_k,
                 self.hidden_size,
                 kwargs["enable_pdl"],
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         if kwargs["do_finalize"]:
@@ -2455,6 +2463,7 @@ class PrimsTsMxfp4Mxfp8MoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 False,
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
@@ -2729,6 +2738,7 @@ class PrimsTsMxfp4Bf16MoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 False,
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
@@ -3097,6 +3107,7 @@ class PrimsTsFp8PerTensorMoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 kwargs.get("use_routing_scales_on_input", False),
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
@@ -3436,6 +3447,7 @@ class PrimsTsFp8BlockScaleMoERunner(_PrimsTsMoERunnerMixin, TunableRunner):
                 kwargs["enable_pdl"],
                 False,
                 None,
+                kwargs.get("zero_rows_without_local_expert", True),
             )
             return []
         return [gemm2_output, expert_weights, expanded_idx_to_permuted_idx]
